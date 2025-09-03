@@ -24,7 +24,8 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - run: npm ci
+      # no lockfile yet → use install, not ci
+      - run: npm install
       - run: npx quartz build
 
       - uses: actions/upload-pages-artifact@v3
