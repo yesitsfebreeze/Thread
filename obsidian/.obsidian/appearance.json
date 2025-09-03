@@ -1,0 +1,8 @@
+{
+  "textFontFamily": "Cascadia Mono",
+  "cssTheme": "Minimal",
+  "enabledCssSnippets": [
+    "obsidian"
+  ],
+  "baseFontSize": 14
+}

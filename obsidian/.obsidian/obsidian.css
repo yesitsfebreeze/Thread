@@ -1,0 +1,17 @@
+/* Force a block cursor in the editor */
+.cm-editor .cm-cursor,
+.cm-editor .cm-dropCursor {
+  border-left: none !important;          /* kill the thin caret */
+  width: 0.6em !important;               /* block width; tweak to taste */
+  background: var(--text-normal) !important;
+  opacity: 0.55;                         /* blink still works */
+}
+
+/* optional: stronger/inverted look against any theme (can be harsh) */
+/*
+.cm-editor .cm-cursor {
+  mix-blend-mode: difference;
+  background: currentColor !important;
+  opacity: 1;
+}
+*/
