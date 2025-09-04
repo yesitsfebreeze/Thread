@@ -25,7 +25,6 @@
   - [[#Resolution]]
 
 ---
-
 # Introduction
 
 **Thread** is a free form role-play system, for 2-6 players, that allows you to create immersive stories which are either led completely by the players, or are structured by a guide.
@@ -37,7 +36,6 @@
 - **Imagination**: For collaborative storytelling and world-building.
 
 ---
-
 # Pillars
 
 Before the story begins, the party defines its **pillars** — the shared vibe, direction, and boundaries of play.  
@@ -60,7 +58,6 @@ Things you do not want.
 - No over the top comedy
 
 ---
-
 # Seal
 
 This is a token, which represents both a **safety** and a **story** tool. It ensures the party can choose when threats should be allowed and reminds everyone at the table to keep the story tight.
@@ -83,7 +80,6 @@ If whoever feels like the current owner is misusing the Seal, The party can deci
 If there is a dispute or something is unclear, the person with the Seal decides, then give it to the one who was overruled.
 
 ---
-
 # Characters
 
 Your character is the lens through which you experience this world.
@@ -92,13 +88,12 @@ In this game, both, characters and encounters are functionally the same. They on
 Characters and encounters consist of:
 - A name
 - A description (and an image/mini if you like)
-- Composure - how much stress you can endure *(max 12)*
-- 3 Stats (Body, Intellect, Empathy)
-- Several Artifacts *(max 6)*
+- Composure - how much stress you can endure *(default max 12)* 
+- 3 Stats ([[#Stats|Fitness]], [[#Stats|Reason]], [[#Stats|Instinct]])
+- Several Artifacts *(default max 6)*
 - Critical Sequence
 
 ---
-
 # Critical Sequence
 
 When you create a new character, roll **2D6**.  
@@ -117,28 +112,25 @@ If both sides roll a critical success in the same conflict, the **challenged pla
 - Because she rolled a **4 AND 6**, she triggers a **guaranteed success**, no matter the opposition’s total.  
 
 ---
-
 # Stats
 
 Each [[#Characters|character]] and [[#Encounters|encounter]] has a stat-block.
 They define how many dice you can use in a roll.
 
 The Stats consist of:
-- **Body** (BOD)
+- **Fitness** (FIT)
   - If the obstacle would yield to muscle, stamina, or raw coordination
-- **Intellect** (INT)
+- **Reason** (RES)
   - If thinking, noticing, or planning beats brawn or force of will
-- **Empathy** (EMP)
+- **Instinct** (INS)
   - If the scene needs persuasion or manipulation
-
 
 When creating a [[#Characters|character]], spend **3** points however you like.
 The distribution will inform how you role-play your character.
 
-> Example: BOD 3, INT 0, EMP 0, makes you strong... but not very bright.
+> Example: FIT 3, RES 0, INS 0, makes you strong... but not very bright.
 
 ---
-
 # Stress
 
 **Stress** measures how much strain your character can endure before they collapse. It represents physical exhaustion, mental pressure, and emotional weight all at once.
@@ -149,7 +141,6 @@ Whenever you **lose a conflict**, you gain Stress equal to the declared Threat L
 If your Stress reaches your **Composure**, your character **collapses**.
 
 ---
-
 # Collapse
 
 When your **Stress** reaches your current **Composure**, your character collapses. This doesn’t mean they are gone forever, but it does mean they can be an active part of role-play, for now.
@@ -176,10 +167,9 @@ When setting an encounter’s difficulty, choose one of these approaches:
 
 - **Lowest Party Composure** → Encounters are easier; best for lighter, story-focused play. *(default)*
 - **Highest Party Composure** → Encounters are tougher; best for groups that want more challenge.
-- **Current Player’s Composure** → Difficulty shifts dynamically depending on who is facing the threat; best for experienced groups that enjoy unpredictability.
+- **Current Player’s Composure** → Difficulty shifts dynamically depending on who is facing the  threat; best for experienced groups that enjoy unpredictability.
 
 ---
-
 # Artifacts
 
 **Artifacts** are strange phenomenon of power. No one fully understands them — they are discovered through play and carried by inhabitants of the world.
@@ -189,7 +179,7 @@ An Artifact always has a **dominant stat**. This is the stat it resonates with m
 - If the character’s value in the dominant stat is **equal to or higher than the Artifact’s requirement**, they may roll the listed number of bonus dice without cost.	
 
 - If the character’s value is **lower**, they can still use it, but must take **Stress equal to the difference** between their stat and the Artifact’s requirement.
-	Characters Body Stat =  +2
+	Characters Body Stat = +2
 	Artifact Requirement = Body +3
 	Player needs to take *1* [[#Stress]] to use it. 
 
@@ -205,7 +195,6 @@ If you gain a new Artifact while already at your maximum, you must discard or tr
 Artifacts are not just tools — they are also story seeds. Their origins, side-effects, and true purposes can be explored as the parties wishes. They may help, they may harm... but often they do both.
 
 ---
-
 # Threats
 
 This game can be played in several modes. It depends on the fact if you have an adventure prepared, or if you want to play in a free form improvisation mode.
@@ -220,11 +209,10 @@ If any one person has a specific story or adventure in mind, they can choose to 
 The guide can demand [[#Resolving Conflicts|rolls]] if a player does something risky and guide the players through the story. Keeping them on track.
 
 ---
-
 # Resolving Conflicts
 
 Whenever you are threatened by an [[#Encounters|encounter]] or another [[#Characters|character]], you will need to roll dice to determine the result. 
-Before a roll, the opposing player or guide declares a threat whenever the outcome seems uncertain. The threat needs to be made in one of the stats category ([[#Stats|BOD]], [[#Stats|INT]], [[#Stats|EMP]]), and have one of the *3* levels listed below. The table can veto if the level feels unjustified, using the [[#Seal]] if needed.
+Before a roll, the opposing player or guide declares a threat whenever the outcome seems uncertain. The threat needs to be made in one of the stats category ([[#Stats|FIT]], [[#Stats|RES]], [[#Stats|INS]]), and have one of the *3* levels listed below. The table can veto if the level feels unjustified, using the [[#Seal]] if needed.
 
 All rolls use **1D6** at minimum. 
 
@@ -236,13 +224,12 @@ All rolls use **1D6** at minimum.
 When narration is opposed, resolve it with a **roll**.Each side gathers dice from [[#Stats]], [[#Artifacts]], and the declared [[#Levels|Level]].
 The **highest sum** of the roll decides the winner.
 ### As the challenged player
-- add the amount of **D6** for the challenged stat ([[#Stats|BOD]], [[#Stats|INT]], [[#Stats|EMP]])
+- add the amount of **D6** for the challenged stat ([[#Stats|FIT]], [[#Stats|RES]], [[#Stats|INS]])
 - When using an Artifact, add **D6** based on its description and pay its cost.
 ### As the threatening player
 - Add the amount of **D6** based on the [[#Levels|Level]]
-
 ### As an encounter
-- add the amount of **D6** for the challenged stat ([[#Stats|BOD]], [[#Stats|INT]], [[#Stats|EMP]])
+- add the amount of **D6** for the challenged stat ([[#Stats|FIT]], [[#Stats|RES]], [[#Stats|INS]])
 - Add the amount of **D6** based on the [[#Levels|Level]]
 
 ## Resolution
@@ -258,7 +245,6 @@ Encounters lose [[#Stress]] equal to the [[#Levels|Level]]:
 **Ties** are in favor of the challenged player.
 
 ---
-
 # Party Wipes
 
 When each member of the party is an [[#Encounters|encounter]], the party is considered wiped.
@@ -335,3 +321,6 @@ The hidden meta layer of this system is, that at the end of one character *(reac
 This vault is then used to feed new character creation and drives the random encounters.
 The character sheet and encounter selection will happen through a web app.
 This layer is only unlocked when you played through the game once.
+
+
+--- PLUS RULE

@@ -1,0 +1,6 @@
+---
+tags:
+  - invention
+aliases:
+  - chip
+---

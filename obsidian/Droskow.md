@@ -1,13 +1,6 @@
 ---
 tags: city
 ---
+**Droskow** began as a humble fishing hamlet on the marsh, blessed with waters so rich that nets could be lowered from windows and hauled up heavy with silver-scaled bounty. Its position between two great kingdoms made it a natural harbor, where goods from the mainland gathered before venturing to the wider sea. From those waters the hamlet grew into a town, and the town into a city.
 
-Droskow began humbly as a riverside fishing hamlet. The waters ran so richly with life that nets could be cast from windows and hauled in heavy with silver-scaled bounty. From these waters the town grew, and from the town, the city. Though nowadays the river has long since dwindled to mud, puddles.
-the foundations remain: a people made resilient by tide and trade alike.
-
-
-
-
-Droskow was founded upon the marsh for its wealth of bog iron, peat, and salt-fish. Its position at the mouth of the Blackfen makes it a natural harbor, where goods from the interior are gathered before reaching the wider sea. Though many cities claim noble origins, Droskow’s fortune rests in trade: a city of barges, bridges, and bargains struck in damp halls.
-
-Trade, yes, but never the honest kind. The iron rusts before it’s sold, the peat smolders with rot, and the fish stink long before they’re salted. The city survives because nowhere else will take what Droskow offers. We live off the waste, the dross.
+Now, the river has dwindled to mud and puddles. Everything in Droskow is clammy and dry at once. The [[Canals]], once crowded with barges and cargo, lie as sticky trenches of drifting sludge. From these puddles the first breath of the [[Dreg]] escaped. A bubble swelled in the heart of the city — larger than any before — and after a long, uneasy week, it burst. Life changed, and so did the city. Trade is dead, but somehow, no one starves. The land is stingy, the fish are gone, yet bowls stay full. People don’t ask why. Best not to.
