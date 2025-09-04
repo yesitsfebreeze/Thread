@@ -10,10 +10,8 @@ on:
       - ".github/workflows/pages.yml"
   workflow_dispatch: {}
 
-  workflow_dispatch: {}
-
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -28,9 +26,9 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # we’re going to commit back
+          fetch-depth: 0
 
-      - name: setup node
+      - name: setup node 22
         uses: actions/setup-node@v4
         with:
           node-version: "22"
@@ -38,28 +36,27 @@ jobs:
       - name: build docs via make
         run: make docs
 
-      # commit only if docs changed
+      # optional: keep docs/ committed in repo
       - name: commit docs
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore(docs): rebuild site"
           file_pattern: docs/**
           branch: master
+
+      # required for Pages deploy (deploys the artifact, not the repo)
+      - name: upload pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
   deploy:
+    needs: build  # <-- run after build finishes
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          # Upload entire repository
-          path: '.'
-      - name: Deploy to GitHub Pages
+      - name: deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
