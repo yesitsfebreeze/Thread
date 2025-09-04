@@ -1,4 +1,4 @@
-name: build-docs
+name: page
 
 on:
   push:
@@ -6,10 +6,12 @@ on:
   workflow_dispatch: {}
 
 permissions:
-  contents: write  # needed to push the docs commit
+  contents: read
+  pages: write
+  id-token: write
 
 concurrency:
-  group: build-docs
+  group: page
   cancel-in-progress: true
 
 jobs:
@@ -36,3 +38,21 @@ jobs:
           commit_message: "chore(docs): rebuild site"
           file_pattern: docs/**
           branch: master
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Upload entire repository
+          path: '.'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
