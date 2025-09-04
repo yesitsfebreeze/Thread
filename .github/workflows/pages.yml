@@ -35,4 +35,4 @@ jobs:
         with:
           commit_message: "chore(docs): rebuild site"
           file_pattern: docs/**
-          branch: main
+          branch: master
