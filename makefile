@@ -11,8 +11,8 @@ docs:
 	@mv tmp/content/__index__.md tmp/content/index.md
 	@cd tmp && npm i && npx quartz create -d ./content -X "new" -l "shortest"
 	@cd tmp && npx quartz build
-	@mkdir -p ./pages
-	@cp tmp/public/* -R ./pages
+	@mkdir -p ./docs
+	@cp tmp/public/* -R ./docs
 	@rm -rf tmp
 
 dev:
