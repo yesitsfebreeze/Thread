@@ -18,38 +18,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  build_and_deploy:
     runs-on: ubuntu-latest
-    outputs:
-      build_dir: docs
     steps:
-      - name: checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
 
-      - name: setup node 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
 
       - name: build docs
         run: make docs
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout (empty)
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: site
-          path: docs
 
       - name: publish to gh-pages
         uses: peaceiris/actions-gh-pages@v4
@@ -58,4 +37,3 @@ jobs:
           publish_dir: ./docs
           publish_branch: gh-pages
           force_orphan: true
-          
