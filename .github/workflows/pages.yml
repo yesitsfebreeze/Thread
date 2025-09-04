@@ -1,4 +1,4 @@
-name: page
+name: pages
 
 on:
   push:
@@ -6,22 +6,22 @@ on:
     paths:
       - "obsidian/**"
       - "quartz.config.ts"
-      - "makefile"
+      - "Makefile"
       - ".github/workflows/pages.yml"
   workflow_dispatch: {}
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 concurrency:
-  group: page
+  group: pages
   cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      build_dir: docs
     steps:
       - name: checkout
         uses: actions/checkout@v4
@@ -33,30 +33,29 @@ jobs:
         with:
           node-version: "22"
 
-      - name: build docs via make
+      - name: build docs
         run: make docs
 
-      # optional: keep docs/ committed in repo
-      - name: commit docs
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "chore(docs): rebuild site"
-          file_pattern: docs/**
-          branch: master
-
-      # required for Pages deploy (deploys the artifact, not the repo)
-      - name: upload pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: docs
-
   deploy:
-    needs: build  # <-- run after build finishes
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: checkout (empty)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: site
+          path: docs
+
+      - name: publish to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          publish_branch: gh-pages
+          force_orphan: true
+          
