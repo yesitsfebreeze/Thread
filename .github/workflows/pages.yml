@@ -3,6 +3,13 @@ name: page
 on:
   push:
     branches: [ master ]
+    paths:
+      - "obsidian/**"
+      - "quartz.config.ts"
+      - "makefile"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch: {}
+
   workflow_dispatch: {}
 
 permissions:
