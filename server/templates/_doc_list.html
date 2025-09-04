@@ -1,0 +1,13 @@
+{{define "_doc_list"}}
+  {{range .}}
+    <div class="row">
+      <div><strong>{{.Title}}</strong> — <a href="/doc/{{.ID}}/edit">edit</a></div>
+      <details>
+        <summary class="muted">JSON</summary>
+        <pre class="mono">{{.DataJSON}}</pre>
+      </details>
+    </div>
+  {{else}}
+    <p class="muted">No documents yet.</p>
+  {{end}}
+{{end}}

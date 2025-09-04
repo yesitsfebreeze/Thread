@@ -1,0 +1,48 @@
+<!doctype html><html><body>
+<p><a href="/">← Back</a></p>
+<h1>{{.vault.Name}}</h1>
+
+<h2>Active schema</h2>
+{{if .schema}}
+  <p><b>{{.schema.Title}}</b> (v{{.schema.Version}})</p>
+  <pre>{{.schema.JSON}}</pre>
+{{else}}
+  <p>No active schema.</p>
+{{end}}
+
+<h3>New schema</h3>
+<form method="post" action="/vault/{{.vault.ID}}/schemas">
+  <label>Title <input name="title" required></label><br>
+  <label>JSON <br>
+    <textarea name="json_schema" rows="6" cols="60" required>
+{"fields":[{"name":"title","label":"Title","type":"string","required":true}]}
+    </textarea>
+  </label><br>
+  <button>Save schema</button>
+</form>
+
+<h3>New document</h3>
+{{if .schema}}
+  <p><a href="/vault/{{.vault.ID}}/new">Open form</a></p>
+{{else}}
+  <p>Create a schema first.</p>
+{{end}}
+
+<h3>Search</h3>
+<form method="get" action="/vault/{{.vault.ID}}/search">
+  <input name="q" placeholder="fts query">
+  <button>Search</button>
+</form>
+
+<h3>Documents</h3>
+<div>
+{{range .documents}}
+  <div>
+    <b>{{.Title}}</b> — <a href="/doc/{{.ID}}/edit">edit</a>
+    <pre>{{.DataJSON}}</pre>
+  </div>
+{{else}}
+  <p>No documents yet.</p>
+{{end}}
+</div>
+</body></html>

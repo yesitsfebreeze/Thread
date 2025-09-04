@@ -1,0 +1,27 @@
+<!doctype html><html><body>
+<p><a href="/vault/{{.doc.VaultID}}">← Back</a></p>
+<h1>Edit: {{.doc.Title}}</h1>
+<form method="post" action="/doc/{{.doc.ID}}/edit">
+  <label>Title <input name="__title" value="{{.doc.Title}}"></label><br>
+  {{range .sd.Fields}}
+    {{if eq .Type "text"}}
+      <label>{{.Label}}<br><textarea name="{{.Name}}">{{index $.data .Name}}</textarea></label><br>
+    {{else if eq .Type "boolean"}}
+      <label><input type="checkbox" name="{{.Name}}" {{if eq (index $.data .Name) true}}checked{{end}}> {{.Label}}</label><br>
+    {{else if eq .Type "select"}}
+      {{$fname := .Name}}
+      <label>{{.Label}}
+        <select name="{{$fname}}">
+          <option value=""></option>
+          {{range .Enum}}<option value="{{.}}" {{if eq (index $.data $fname) .}}selected{{end}}>{{.}}</option>{{end}}
+        </select>
+      </label><br>
+    {{else if eq .Type "number"}}
+      <label>{{.Label}} <input type="number" step="any" name="{{.Name}}" value="{{index $.data .Name}}"></label><br>
+    {{else}}
+      <label>{{.Label}} <input name="{{.Name}}" value="{{index $.data .Name}}"></label><br>
+    {{end}}
+  {{end}}
+  <button>Save</button>
+</form>
+</body></html>

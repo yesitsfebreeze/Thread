@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+<body>
+
+  <h1>Vaults</h1>
+
+<form method="post" action="/vaults">
+  <label>Name <input name="name" required></label>
+  <label>Slug <input name="slug" required></label>
+  <button>Create</button>
+</form>
+
+<ul>
+{{range .vaults}}
+  <li><a href="/vault/{{.ID}}"><b>{{.Name}}</b></a> — /{{.Slug}}</li>
+{{else}}
+  <li>No vaults yet.</li>
+{{end}}
+</ul>
+
+</body>
+</html>

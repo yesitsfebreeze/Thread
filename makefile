@@ -16,3 +16,16 @@ docs:
 
 dev:
 	@cd tmp && npx quartz build --serve
+
+
+build:
+	@cd server && go mod tidy
+	@cd server && go build -o ../bin/thread
+
+watch:
+	@go install github.com/air-verse/air@latest
+ifeq ($(OS),Windows_NT)
+	@cd server && air -c .air.win.toml
+else
+	@cd server && air -c .air.lin.toml
+endif
