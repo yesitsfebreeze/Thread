@@ -3,11 +3,6 @@ name: build-docs
 on:
   push:
     branches: [ main ]
-    paths:
-      - "obsidian/**"
-      - "quartz.config.ts"
-      - "Makefile"
-      - ".github/workflows/build-docs.yml"
   workflow_dispatch: {}
 
 permissions:
