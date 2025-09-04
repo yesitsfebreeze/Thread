@@ -41,12 +41,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Dreg.md",
+                "file": "Vibe.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Dreg"
+              "title": "Vibe"
             }
           }
         ],
@@ -123,7 +123,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Dreg.md",
+                "file": "Vibe.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -133,7 +133,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Dreg"
+              "title": "Backlinks for Vibe"
             }
           },
           {
@@ -199,6 +199,16 @@
   },
   "active": "8ff87fc143c06ce3",
   "lastOpenFiles": [
+    "95301cf912ddfe2b7ffc9598cd0be378.jpg",
+    "WakeUp.md",
+    "Berg Inn.md",
+    "Bergthold.md",
+    "Chip.md",
+    "Cornered Inn.md",
+    "Dreg.md",
+    "Droskow.md",
+    "Syphons.md",
+    "f2a739290b34d033962a83f0750ecfa4.jpg",
     "ba178c3ac80000a714cb3b41377c570c.jpg",
     "Guide.md",
     "__Legend.md",
@@ -208,12 +218,7 @@
     "The River.md",
     "THE-THREAD-SRD.md",
     "Vibe.md",
-    "Dreg.md",
-    "Droskow.md",
     "Prolog.md",
-    "Berg Inn.md",
-    "Chip.md",
-    "Bergthold.md",
     "posts/WakeUp.md",
     "posts/THE-THREAD-SRD.md",
     "posts/The River.md",
@@ -223,12 +228,9 @@
     "posts/Guide.md",
     "posts/Droskow.md",
     "posts/Dreg.md",
-    "posts/Cornered Inn.md",
-    "posts/__Legend.md",
     "posts",
     "obsidian",
     "map.psd",
-    "Katwick.md",
     "Untitled.base",
     "THE-THREAD-SRD.pdf",
     "story",
