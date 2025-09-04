@@ -1,13 +1,15 @@
 .PHONY: docs dev
 
-docs:
-	@rm -rf tmp
-	@rm -rf pages
+
+
+docs: clean_docs
 	@git clone https://github.com/jackyzha0/quartz.git ./tmp
 	@rm -rf tmp/content
 	@mkdir -p tmp/content
+	@cp -R quartz/* tmp/
 	@cp -R obsidian/* tmp/content
-	@cp -R quartz.config.ts tmp/quartz.config.ts
+	@mv tmp/content/assets tmp/content/static
+	
 	@cd tmp && npm i && npx quartz create -d ./content -X "new" -l "shortest"
 	@mv tmp/content/__index__.md tmp/content/index.md
 	@cd tmp && npx quartz build
@@ -29,3 +31,15 @@ ifeq ($(OS),Windows_NT)
 else
 	@cd server && air -c .air.lin.toml
 endif
+
+
+clean_docs:
+	@echo "Cleaning up docs..."
+	@rm -rf tmp
+	@rm -rf docs
+
+clean_bin:
+	@rm -rf bin
+
+clean: clean_docs clean_bin
+	

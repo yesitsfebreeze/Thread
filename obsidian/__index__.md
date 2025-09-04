@@ -3,11 +3,17 @@ title: The Thread
 ---
 
 #city 
+
 #location
+
 #building 
+
 #person
+
 #spot
+
 #invention
+
 #phenomenon
 
 
