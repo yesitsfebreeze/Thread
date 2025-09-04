@@ -1,26 +1,42 @@
-<!doctype html><html><body>
-<p><a href="/vault/{{.vault_id}}">← Back</a></p>
-<h1>New Document ({{.schema.Title}} v{{.schema.Version}})</h1>
-<form method="post" action="/vault/{{.vault_id}}/documents">
-  <label>Title <input name="__title" placeholder="auto from first field if empty"></label><br>
-  {{range .sd.Fields}}
-    {{if eq .Type "text"}}
-      <label>{{.Label}}<br><textarea name="{{.Name}}"></textarea></label><br>
-    {{else if eq .Type "boolean"}}
-      <label><input type="checkbox" name="{{.Name}}"> {{.Label}}</label><br>
-    {{else if eq .Type "select"}}
-      <label>{{.Label}}
-        <select name="{{.Name}}">
+{{ define "title" }}Thread · New Document{{ end }}
+{{ template "base" . }}
+{{ define "actions" }}
+<a href="/vault/{{ .vault_id }}" class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm hover:bg-slate-50">Back</a>
+{{ end }}
+{{ define "content" }}
+<h1 class="text-2xl font-semibold mb-4">New Document</h1>
+<form hx-post="/vault/{{ .vault_id }}/documents" hx-redirect="/vault/{{ .vault_id }}" class="space-y-4 max-w-2xl">
+  <div>
+    <label class="block text-sm text-slate-600">Title (optional)</label>
+    <input name="__title" class="mt-1 w-full rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500" />
+  </div>
+
+  {{ range .sd.Fields }}
+    <div>
+      <label class="block text-sm text-slate-700">{{ .Label }}</label>
+      {{ if eq .Type "text" }}
+        <textarea name="{{ .Name }}" rows="4" class="mt-1 w-full rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500"></textarea>
+      {{ else if eq .Type "boolean" }}
+        <label class="inline-flex items-center gap-2 mt-1">
+          <input type="checkbox" name="{{ .Name }}" class="rounded border-slate-300 text-brand-600 focus:ring-brand-500" />
+          <span class="text-sm text-slate-600">True</span>
+        </label>
+      {{ else if eq .Type "number" }}
+        <input type="number" step="any" name="{{ .Name }}" class="mt-1 w-full rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500" />
+      {{ else if eq .Type "select" }}
+        <select name="{{ .Name }}" class="mt-1 w-full rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500">
           <option value=""></option>
-          {{range .Enum}}<option value="{{.}}">{{.}}</option>{{end}}
+          {{ range .Enum }}<option value="{{ . }}">{{ . }}</option>{{ end }}
         </select>
-      </label><br>
-    {{else if eq .Type "number"}}
-      <label>{{.Label}} <input type="number" step="any" name="{{.Name}}"></label><br>
-    {{else}}
-      <label>{{.Label}} <input name="{{.Name}}"></label><br>
-    {{end}}
-  {{end}}
-  <button>Create</button>
+      {{ else }}
+        <input name="{{ .Name }}" class="mt-1 w-full rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500" />
+      {{ end }}
+      {{ if .Required }}<p class="mt-1 text-xs text-rose-600">Required</p>{{ end }}
+    </div>
+  {{ end }}
+
+  <div class="pt-2">
+    <button class="inline-flex items-center rounded-lg bg-brand-600 px-3 py-2 text-white hover:bg-brand-700">Save</button>
+  </div>
 </form>
-</body></html>
+{{ end }}

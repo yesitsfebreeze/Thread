@@ -1,13 +1,13 @@
-{{define "_doc_list"}}
-  {{range .}}
-    <div class="row">
-      <div><strong>{{.Title}}</strong> — <a href="/doc/{{.ID}}/edit">edit</a></div>
-      <details>
-        <summary class="muted">JSON</summary>
-        <pre class="mono">{{.DataJSON}}</pre>
-      </details>
-    </div>
-  {{else}}
-    <p class="muted">No documents yet.</p>
-  {{end}}
-{{end}}
+{{ define "_doc_list.html" }}
+  {{- range . -}}
+  <tr class="hover:bg-slate-50">
+    <td class="px-4 py-2">{{ .Title }}</td>
+    <td class="px-4 py-2 text-sm text-slate-500">{{ .UpdatedAt }}</td>
+    <td class="px-4 py-2 text-right">
+      <a class="text-brand-700 hover:underline" href="/vault/{{ .VaultID }}/doc/{{ .ID }}/edit">Edit</a>
+    </td>
+  </tr>
+  {{- else -}}
+  <tr><td colspan="3" class="px-4 py-6 text-center text-slate-500">No documents yet.</td></tr>
+  {{- end -}}
+{{ end }}

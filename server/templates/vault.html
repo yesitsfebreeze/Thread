@@ -1,48 +1,67 @@
-<!doctype html><html><body>
-<p><a href="/">← Back</a></p>
-<h1>{{.vault.Name}}</h1>
-
-<h2>Active schema</h2>
-{{if .schema}}
-  <p><b>{{.schema.Title}}</b> (v{{.schema.Version}})</p>
-  <pre>{{.schema.JSON}}</pre>
-{{else}}
-  <p>No active schema.</p>
-{{end}}
-
-<h3>New schema</h3>
-<form method="post" action="/vault/{{.vault.ID}}/schemas">
-  <label>Title <input name="title" required></label><br>
-  <label>JSON <br>
-    <textarea name="json_schema" rows="6" cols="60" required>
-{"fields":[{"name":"title","label":"Title","type":"string","required":true}]}
-    </textarea>
-  </label><br>
-  <button>Save schema</button>
-</form>
-
-<h3>New document</h3>
-{{if .schema}}
-  <p><a href="/vault/{{.vault.ID}}/new">Open form</a></p>
-{{else}}
-  <p>Create a schema first.</p>
-{{end}}
-
-<h3>Search</h3>
-<form method="get" action="/vault/{{.vault.ID}}/search">
-  <input name="q" placeholder="fts query">
-  <button>Search</button>
-</form>
-
-<h3>Documents</h3>
-<div>
-{{range .documents}}
-  <div>
-    <b>{{.Title}}</b> — <a href="/doc/{{.ID}}/edit">edit</a>
-    <pre>{{.DataJSON}}</pre>
-  </div>
-{{else}}
-  <p>No documents yet.</p>
-{{end}}
+{{ define "title" }}Thread · Vault{{ end }}
+{{ template "base" . }}
+{{ define "actions" }}
+<a href="/" class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm hover:bg-slate-50">All Vaults</a>
+{{ end }}
+{{ define "content" }}
+<div class="mb-6">
+  <h1 class="text-2xl font-semibold">{{ .vault.Name }}</h1>
+  <p class="text-slate-500 text-sm">Slug: <span class="rounded bg-slate-100 px-1.5 py-0.5">{{ .vault.Slug }}</span></p>
 </div>
-</body></html>
+
+<div class="grid md:grid-cols-3 gap-6">
+  <section class="md:col-span-2 space-y-4">
+    <form hx-get="/vault/{{ .vault.ID }}/search" hx-target="#doc_list" hx-push-url="true" class="relative">
+      <input type="search" name="q" placeholder="Search documents…" class="w-full rounded-xl border-slate-300 pl-10 pr-3 py-2 focus:border-brand-500 focus:ring-brand-500" />
+      <svg class="pointer-events-none absolute left-3 top-2.5 h-5 w-5 text-slate-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.9 14.32a8 8 0 111.414-1.414l4.387 4.387-1.415 1.414-4.386-4.387zM14 8a6 6 0 11-12 0 6 6 0 0112 0z" clip-rule="evenodd"/></svg>
+    </form>
+
+    <div class="overflow-hidden rounded-xl border border-slate-200 bg-white">
+      <table class="min-w-full divide-y divide-slate-200">
+        <thead class="bg-slate-50">
+          <tr>
+            <th class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Title</th>
+            <th class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Updated</th>
+            <th class="px-4 py-2"></th>
+          </tr>
+        </thead>
+        <tbody id="doc_list" class="divide-y divide-slate-100">
+          {{ template "_doc_list.html" .documents }}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <aside class="space-y-4">
+    <div class="rounded-xl border border-slate-200 bg-white p-4">
+      <h2 class="text-lg font-semibold">Active Schema</h2>
+      {{ if .schema }}
+        <p class="text-sm text-slate-600">{{ .schema.Title }}</p>
+        <p class="text-xs text-slate-400">v{{ .schema.Version }} • {{ .schema.CreatedAt }}</p>
+      {{ else }}
+        <p class="text-sm text-slate-600">No active schema.</p>
+      {{ end }}
+    </div>
+
+    <div class="rounded-xl border border-slate-200 bg-white p-4">
+      <h2 class="text-lg font-semibold mb-2">New Document</h2>
+      <a class="inline-flex items-center rounded-lg bg-brand-600 px-3 py-2 text-white hover:bg-brand-700" href="/vault/{{ .vault.ID }}/new">Create</a>
+    </div>
+
+    <div class="rounded-xl border border-slate-200 bg-white p-4">
+      <h2 class="text-lg font-semibold mb-2">Update Schema</h2>
+      <form hx-post="/vault/{{ .vault.ID }}/schemas" hx-redirect="/vault/{{ .vault.ID }}" class="space-y-3">
+        <div>
+          <label class="block text-sm text-slate-600">Title</label>
+          <input name="title" required class="mt-1 w-full rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500" />
+        </div>
+        <div>
+          <label class="block text-sm text-slate-600">JSON Schema</label>
+          <textarea name="json_schema" rows="6" required class="mt-1 w-full rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 font-mono text-xs"></textarea>
+        </div>
+        <button class="inline-flex items-center rounded-lg bg-slate-800 px-3 py-2 text-white hover:bg-slate-900">Save Schema</button>
+      </form>
+    </div>
+  </aside>
+</div>
+{{ end }}

@@ -1,0 +1,7 @@
+{
+	"files.exclude": {
+    "server/go.mod": true,
+		"server/go.sum": true,
+		"server/.air*": true,
+	}
+}

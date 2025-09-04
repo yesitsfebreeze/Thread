@@ -4,7 +4,7 @@ tmp_dir = "../bin"
 [build]
 cmd = "go build -o ../bin/thread.exe ."
 bin = "../bin/thread.exe"
-exclude_dir = ["../bin", ".git"]
+exclude_dir = ["../bin", ".git", "dbs"]
 include_ext = ["go", "html", "tpl", "tmpl"]
 delay = 200
 
