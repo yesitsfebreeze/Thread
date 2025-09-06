@@ -9,7 +9,6 @@
   - [[#Exploration]]
   - [[#Coherence]]
 - [[#Characters]]
-- [[#Critical Sequence]]
 - [[#Stats]]
 - [[#Stress]]  
 - [[#Collapse]]
@@ -94,24 +93,6 @@ Characters and encounters consist of:
 - Critical Sequence
 
 ---
-# Critical Sequence
-
-When you create a new character, roll **2D6**.  
-The result becomes your **Critical Sequence** — two special numbers unique to your character.  
-
-Whenever you roll dice during play:  
-- If one of your dice matches a number from your **Critical Sequence**, that die counts as a **guaranteed success**.  
-- The same applies to your opposition — every character and encounter has their own **Critical Sequence**.  
-
-### Double Criticals
-If both sides roll a critical success in the same conflict, the **challenged player** wins the resolution.  
-
-### Example
-- Alice’s Critical Sequence is **4** and **6**.  
-- She rolls 3 dice during a conflict and gets **2, 4, 6**.  
-- Because she rolled a **4 AND 6**, she triggers a **guaranteed success**, no matter the opposition’s total.  
-
----
 # Stats
 
 Each [[#Characters|character]] and [[#Encounters|encounter]] has a stat-block.
@@ -131,19 +112,19 @@ The distribution will inform how you role-play your character.
 > Example: FIT 3, RES 0, INS 0, makes you strong... but not very bright.
 
 ---
-# Stress
+# Infection
 
-**Stress** measures how much strain your character can endure before they collapse. It represents physical exhaustion, mental pressure, and emotional weight all at once.
+**Infection** measures how much spores your character can endure before they collapse. It represents physical exhaustion, mental pressure, and emotional weight all at once.
 
-Each character begins with a **Composure of 3**.
-Whenever you **lose a conflict**, you gain Stress equal to the declared Threat Level. Some **Artifacts** may also require you to take Stress in order to use them.
+Each character begins with a **Resistance of 3**.
+Whenever you **lose a conflict**, you gain Spores equal to the declared Threat Level. Some **Artifacts** may also require you to take Spores in, in order to use them.
 
-If your Stress reaches your **Composure**, your character **collapses**.
+If your Spore-Infection reaches your **Resistance**, your character **collapses**.
 
 ---
 # Collapse
 
-When your **Stress** reaches your current **Composure**, your character collapses. This doesn’t mean they are gone forever, but it does mean they can be an active part of role-play, for now.
+When your **Infection** reaches your current **Resistance**, your character collapses. This doesn’t mean they are gone forever, but it does mean they can be an active part of role-play, for now.
 At this moment, your character becomes an **Encounter** — part of the world rather than a player’s protagonist.
 
 Once the encounter you became is resolved or leaves the story, you return as your character. When you awaken, increase your **Composure by +1** up to a maximum of **12**.
@@ -160,7 +141,7 @@ While mechanically they function just like [[#Characters|characters]], an encoun
 
 When an encounter **fails to achieve its goal** or is **defeated in a roll**, it reveals the **information it holds**. This might be a secret, a map, a weakness, or even a hint about greater threats.
 
-Unlike characters, encounters **lose [[#Stress|stress]]** instead of gaining it when they fail. If their stress is reduced to **0**, the encounter disappears from the story. Before they fade, they drop one of their [[#Artifacts|artifacts]], which other players may claim. If that player already carries their maximum of artifacts, they must discard one to pick it up.
+Unlike characters, encounters **lose [[#Infection|spores]]** instead of gaining it when they fail. If their infection is reduced to **0**, the encounter disappears from the story. Before they fade, they drop one of their [[#Artifacts|artifacts]], which other players may claim. If that player already carries their maximum of artifacts, they must discard one to pick it up.
 
 ### Encounter Scaling
 When setting an encounter’s difficulty, choose one of these approaches:
@@ -213,30 +194,28 @@ The guide can demand [[#Resolving Conflicts|rolls]] if a player does something r
 
 Whenever you are threatened by an [[#Encounters|encounter]] or another [[#Characters|character]], you will need to roll dice to determine the result. 
 Before a roll, the opposing player or guide declares a threat whenever the outcome seems uncertain. The threat needs to be made in one of the stats category ([[#Stats|FIT]], [[#Stats|RES]], [[#Stats|INS]]), and have one of the *3* levels listed below. The table can veto if the level feels unjustified, using the [[#Seal]] if needed.
-
-All rolls use **1D6** at minimum. 
-
 ### Levels
-- **Minor** +1D6 - *small stakes, low risk*  
-- **Risky** +2D6 - *significant stakes*  
-- **Fatal** +3D6 - *high stakes, dramatic events*  
+- **Minor** - *small stakes, low risk*  
+- **Risky** - *significant stakes*  
+- **Fatal** - *high stakes, dramatic events*  
 
-When narration is opposed, resolve it with a **roll**.Each side gathers dice from [[#Stats]], [[#Artifacts]], and the declared [[#Levels|Level]].
-The **highest sum** of the roll decides the winner.
-### As the challenged player
-- add the amount of **D6** for the challenged stat ([[#Stats|FIT]], [[#Stats|RES]], [[#Stats|INS]])
-- When using an Artifact, add **D6** based on its description and pay its cost.
-### As the threatening player
-- Add the amount of **D6** based on the [[#Levels|Level]]
-### As an encounter
-- add the amount of **D6** for the challenged stat ([[#Stats|FIT]], [[#Stats|RES]], [[#Stats|INS]])
-- Add the amount of **D6** based on the [[#Levels|Level]]
+If challenged, roll **3** dice.
+For Minor, sum all dice + Stat.
+For Risky, remove the lowest dice + Stat.
+For Fatal, remove highest dice + Stat.
+
+If you are below 9, you failed.
+If you are exactly at 9, you succeed, but with a complication.
+If you are above 9, you won.
 
 ## Resolution
 ### **Winner**
 Narrates the outcome.
+
+Complication
+Challenger can add a twist that makes it harder for you to tell your story.
 ### **Loser**:
-Characters gain [[#Stress]] equal to the [[#Levels| Level]]:
+Characters gain an [[#Stress]] equal to the [[#Levels| Level]]:
 Encounters lose [[#Stress]] equal to the [[#Levels|Level]]:
 - Minor → 1 Stress
 - Risky → 2 Stress

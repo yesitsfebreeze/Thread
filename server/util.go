@@ -1,11 +1,14 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -92,4 +95,54 @@ func validate_schema(sd schemaDoc) error {
 		}
 	}
 	return nil
+}
+
+type api_error struct {
+	Error   string `json:"error"`
+	Message string `json:"message,omitempty"`
+}
+
+func with_json(w http.ResponseWriter, v any) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(v)
+}
+
+func json_created(w http.ResponseWriter, v any) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	_ = json.NewEncoder(w).Encode(v)
+}
+
+func json_err(w http.ResponseWriter, code int, errCode, msg string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	_ = json.NewEncoder(w).Encode(api_error{Error: errCode, Message: msg})
+}
+
+func must_method(w http.ResponseWriter, r *http.Request, methods ...string) bool {
+	for _, m := range methods {
+		if r.Method == m {
+			return true
+		}
+	}
+	w.Header().Set("Allow", strings.Join(methods, ", "))
+	json_err(w, http.StatusMethodNotAllowed, "method_not_allowed", "use one of: "+strings.Join(methods, ", "))
+	return false
+}
+
+func path_parts(r *http.Request) []string {
+	p := strings.Trim(r.URL.Path, "/")
+	if p == "" {
+		return nil
+	}
+	return strings.Split(p, "/")
+}
+
+func parse_int64(s string) (int64, error) {
+	id, err := strconv.ParseInt(s, 10, 64)
+	if err != nil {
+		return 0, errors.New("invalid_id")
+	}
+	return id, nil
 }

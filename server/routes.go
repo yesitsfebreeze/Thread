@@ -10,127 +10,170 @@ import (
 )
 
 func register_routes() {
-	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(tplFS))))
 	http.HandleFunc("/", handle_index)
-	http.HandleFunc("/vaults", handle_create_vault)
-	http.HandleFunc("/vault/", handle_vault_router)
+	http.HandleFunc("/vaults", handle_create_vault) // POST /vaults
+	http.HandleFunc("/vault/", handle_vault_router) // subroutes under /vault/{id}
 }
 
+// GET /  -> list vaults (json only)
 func handle_index(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		http.NotFound(w, r)
 		return
 	}
+	if !must_method(w, r, http.MethodGet) {
+		return
+	}
 	items, err := ix.list_vaults()
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		json_err(w, http.StatusInternalServerError, "list_failed", err.Error())
 		return
 	}
-	if err := tpl.ExecuteTemplate(w, "index.html", map[string]any{"vaults": items}); err != nil {
-		http.Error(w, err.Error(), 500)
-	}
+	with_json(w, map[string]any{
+		"vaults": items,
+		"count":  len(items),
+	})
 }
 
+// POST /vaults {name, slug} -> create vault
 func handle_create_vault(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "method not allowed", 405)
+	if !must_method(w, r, http.MethodPost) {
 		return
 	}
-	name := strings.TrimSpace(r.FormValue("name"))
-	slug := strings.TrimSpace(r.FormValue("slug"))
-	v, err := ix.create_vault(name, slug)
+	var in struct {
+		Name string `json:"name"`
+		Slug string `json:"slug"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
+		json_err(w, http.StatusBadRequest, "invalid_json", err.Error())
+		return
+	}
+	if strings.TrimSpace(in.Name) == "" || strings.TrimSpace(in.Slug) == "" {
+		json_err(w, http.StatusBadRequest, "missing_fields", "name and slug are required")
+		return
+	}
+	v, err := ix.create_vault(strings.TrimSpace(in.Name), strings.TrimSpace(in.Slug))
 	if err != nil {
-		http.Error(w, err.Error(), 400)
+		json_err(w, http.StatusBadRequest, "create_failed", err.Error())
 		return
 	}
-	if r.Header.Get("HX-Request") == "true" {
-		_ = tpl.ExecuteTemplate(w, "_vault_row.html", v)
-		return
-	}
-	http.Redirect(w, r, fmt.Sprintf("/vault/%d", v.ID), http.StatusSeeOther)
+	json_created(w, v)
 }
 
-// /vault/{id} (+ subroutes)
+// /vault/{id}
+//
+//	GET                     -> show vault summary (vault, active_schema?, recent docs)
+//	POST /schemas           -> create schema
+//	POST /documents         -> create document
+//	GET  /search?q=...      -> search docs (fts)
+//	GET  /doc/{docID}       -> get doc
+//	PUT  /doc/{docID}       -> update doc
 func handle_vault_router(w http.ResponseWriter, r *http.Request) {
-	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
-	if len(parts) < 2 {
+	pp := path_parts(r)
+	// expect at least ["vault", "{id}"]
+	if len(pp) < 2 {
 		http.NotFound(w, r)
 		return
 	}
-	vID, err := strconv.ParseInt(parts[1], 10, 64)
+	// pp[0] == "vault"
+	if pp[0] != "vault" {
+		http.NotFound(w, r)
+		return
+	}
+
+	vID, err := parse_int64(pp[1])
 	if err != nil {
-		http.NotFound(w, r)
+		json_err(w, http.StatusBadRequest, "invalid_id", "vault id must be an integer")
 		return
 	}
 
-	// nested: /vault/{id}
-	if len(parts) == 2 && r.Method == http.MethodGet {
-		handle_vault_show(w, r, vID)
-		return
-	}
-
-	// nested: /vault/{id}/new | /schemas | /documents | /search
-	if len(parts) == 3 {
-		switch parts[2] {
-		case "new":
-			if r.Method == http.MethodGet {
-				handle_new_document_form(w, r, vID)
-				return
-			}
-		case "schemas":
-			if r.Method == http.MethodPost {
-				handle_create_schema(w, r, vID)
-				return
-			}
-		case "documents":
-			if r.Method == http.MethodPost {
-				handle_create_document(w, r, vID)
-				return
-			}
-		case "search":
-			if r.Method == http.MethodGet {
-				handle_search(w, r, vID)
-				return
-			}
+	// /vault/{id}
+	if len(pp) == 2 {
+		switch r.Method {
+		case http.MethodGet:
+			handle_vault_show(w, r, vID)
+			return
+		default:
+			must_method(w, r, http.MethodGet)
+			return
 		}
 	}
 
-	// nested: /vault/{id}/doc/{docID}/edit
-	if len(parts) == 5 && parts[2] == "doc" && parts[4] == "edit" {
-		docID, err := strconv.ParseInt(parts[3], 10, 64)
-		if err != nil {
+	// /vault/{id}/schemas | /documents | /search | /doc/{docID}
+	switch pp[2] {
+	case "schemas":
+		if len(pp) != 3 {
 			http.NotFound(w, r)
+			return
+		}
+		if !must_method(w, r, http.MethodPost) {
+			return
+		}
+		handle_create_schema(w, r, vID)
+		return
+
+	case "documents":
+		if len(pp) != 3 {
+			http.NotFound(w, r)
+			return
+		}
+		if !must_method(w, r, http.MethodPost) {
+			return
+		}
+		handle_create_document(w, r, vID)
+		return
+
+	case "search":
+		if len(pp) != 3 {
+			http.NotFound(w, r)
+			return
+		}
+		if !must_method(w, r, http.MethodGet) {
+			return
+		}
+		handle_search(w, r, vID)
+		return
+
+	case "doc":
+		if len(pp) != 4 {
+			http.NotFound(w, r)
+			return
+		}
+		docID, err := parse_int64(pp[3])
+		if err != nil {
+			json_err(w, http.StatusBadRequest, "invalid_id", "doc id must be an integer")
 			return
 		}
 		switch r.Method {
 		case http.MethodGet:
-			handle_edit_document_form(w, r, vID, docID)
+			handle_get_document(w, r, vID, docID)
 			return
-		case http.MethodPost:
+		case http.MethodPut, http.MethodPatch:
 			handle_update_document(w, r, vID, docID)
 			return
 		default:
-			http.Error(w, "method not allowed", 405)
+			must_method(w, r, http.MethodGet, http.MethodPut, http.MethodPatch)
 			return
 		}
-	}
-
-	http.NotFound(w, r)
-}
-
-func handle_vault_show(w http.ResponseWriter, r *http.Request, vaultID int64) {
-	v, err := ix.get_vault(vaultID)
-	if err != nil {
+	default:
 		http.NotFound(w, r)
 		return
 	}
+}
 
-	vdb, err := vs.db_for_vault(vaultID)
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-		return
-	}
+// GET /vault/{id}
+func handle_vault_show(w http.ResponseWriter, r *http.Request, vaultID int64) {
+	// parse slug instead of int
+	parts := path_parts(r)
+	slug := parts[1] // e.g. "harbor"
 
+	// look up vault by slug if you need meta info
+	v, err := ix.get_vault_by_slug(slug)
+
+	// pass slug into per-vault db call
+	vdb, err := vs.db_for_vault(slug)
+
+	// active schema (optional)
 	var s *schema
 	var tmp schema
 	if err := vdb.QueryRow(`SELECT id, vault_id, version, title, json, is_active, created_at
@@ -140,50 +183,60 @@ func handle_vault_show(w http.ResponseWriter, r *http.Request, vaultID int64) {
 		s = &tmp
 	}
 
+	// recent docs
 	rows, err := vdb.Query(`SELECT id, vault_id, schema_id, title, data_json, created_at, updated_at
 	                        FROM documents ORDER BY updated_at DESC LIMIT 50`)
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		json_err(w, http.StatusInternalServerError, "query_failed", err.Error())
 		return
 	}
 	defer rows.Close()
+
 	var docs []document
 	for rows.Next() {
 		var d document
 		if err := rows.Scan(&d.ID, &d.VaultID, &d.SchemaID, &d.Title, &d.DataJSON, &d.CreatedAt, &d.UpdatedAt); err != nil {
-			http.Error(w, err.Error(), 500)
+			json_err(w, http.StatusInternalServerError, "scan_failed", err.Error())
 			return
 		}
 		docs = append(docs, d)
 	}
-	if err := tpl.ExecuteTemplate(w, "vault.html", map[string]any{"vault": v, "schema": s, "documents": docs}); err != nil {
-		http.Error(w, err.Error(), 500)
-	}
+
+	with_json(w, map[string]any{
+		"vault":     v,
+		"schema":    s,    // may be null
+		"documents": docs, // may be empty
+	})
 }
 
-// --- schemas (per-vault db) --------------------------------------------------
-
+// POST /vault/{id}/schemas {title, json_schema}
 func handle_create_schema(w http.ResponseWriter, r *http.Request, vaultID int64) {
-	title := strings.TrimSpace(r.FormValue("title"))
-	jsonStr := strings.TrimSpace(r.FormValue("json_schema"))
-	if title == "" || jsonStr == "" {
-		http.Error(w, "title and json_schema required", 400)
+	var in struct {
+		Title      string          `json:"title"`
+		JSONSchema json.RawMessage `json:"json_schema"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
+		json_err(w, http.StatusBadRequest, "invalid_json", err.Error())
+		return
+	}
+	if strings.TrimSpace(in.Title) == "" || len(in.JSONSchema) == 0 {
+		json_err(w, http.StatusBadRequest, "missing_fields", "title and json_schema are required")
 		return
 	}
 
 	var sd schemaDoc
-	if err := json.Unmarshal([]byte(jsonStr), &sd); err != nil {
-		http.Error(w, "invalid json_schema: "+err.Error(), 400)
+	if err := json.Unmarshal(in.JSONSchema, &sd); err != nil {
+		json_err(w, http.StatusBadRequest, "invalid_schema_json", err.Error())
 		return
 	}
 	if err := validate_schema(sd); err != nil {
-		http.Error(w, "invalid schema: "+err.Error(), 400)
+		json_err(w, http.StatusBadRequest, "invalid_schema", err.Error())
 		return
 	}
 
 	vdb, err := vs.db_for_vault(vaultID)
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		json_err(w, http.StatusInternalServerError, "db_open_failed", err.Error())
 		return
 	}
 
@@ -193,95 +246,107 @@ func handle_create_schema(w http.ResponseWriter, r *http.Request, vaultID int64)
 	tx, _ := vdb.Begin()
 	_, _ = tx.Exec(`UPDATE schemas SET is_active=0`)
 	_, err = tx.Exec(`INSERT INTO schemas(vault_id, version, title, json, is_active, created_at)
-	                  VALUES(?,?,?,?,1,?)`, vaultID, version, title, jsonStr, time.Now().UTC())
+	                  VALUES(?,?,?,?,1,?)`, vaultID, version, in.Title, string(in.JSONSchema), time.Now().UTC())
 	if err != nil {
 		_ = tx.Rollback()
-		http.Error(w, err.Error(), 500)
+		json_err(w, http.StatusInternalServerError, "insert_failed", err.Error())
 		return
 	}
 	if err := tx.Commit(); err != nil {
-		http.Error(w, err.Error(), 500)
+		json_err(w, http.StatusInternalServerError, "commit_failed", err.Error())
 		return
 	}
 
-	if r.Header.Get("HX-Request") == "true" {
-		w.Header().Set("HX-Redirect", fmt.Sprintf("/vault/%d", vaultID))
-		w.WriteHeader(http.StatusNoContent)
-		return
-	}
-	http.Redirect(w, r, fmt.Sprintf("/vault/%d", vaultID), http.StatusSeeOther)
+	json_created(w, map[string]any{
+		"vault_id":  vaultID,
+		"version":   version,
+		"title":     in.Title,
+		"json":      json.RawMessage(in.JSONSchema),
+		"is_active": true,
+	})
 }
 
-// --- documents (per-vault db) -----------------------------------------------
-
-func handle_new_document_form(w http.ResponseWriter, r *http.Request, vaultID int64) {
-	vdb, err := vs.db_for_vault(vaultID)
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-		return
-	}
-
-	var s schema
-	if err := vdb.QueryRow(`SELECT id, vault_id, version, title, json, is_active, created_at
-	                        FROM schemas WHERE is_active=1 ORDER BY version DESC LIMIT 1`).
-		Scan(&s.ID, &s.VaultID, &s.Version, &s.Title, &s.JSON, &s.IsActive, &s.CreatedAt); err != nil {
-		http.Error(w, "no active schema", 400)
-		return
-	}
-	var sd schemaDoc
-	_ = json.Unmarshal([]byte(s.JSON), &sd)
-	_ = tpl.ExecuteTemplate(w, "doc_new.html", map[string]any{"vault_id": vaultID, "schema": s, "sd": sd})
-}
-
+// POST /vault/{id}/documents
+// body: { "title": "optional", "data": {<fields>}}
 func handle_create_document(w http.ResponseWriter, r *http.Request, vaultID int64) {
+	type input struct {
+		Title string         `json:"title"`
+		Data  map[string]any `json:"data"`
+	}
+	var in input
+	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
+		json_err(w, http.StatusBadRequest, "invalid_json", err.Error())
+		return
+	}
 	vdb, err := vs.db_for_vault(vaultID)
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		json_err(w, http.StatusInternalServerError, "db_open_failed", err.Error())
 		return
 	}
 
 	var s schema
 	if err := vdb.QueryRow(`SELECT id, vault_id, version, title, json, is_active, created_at
-	                        FROM schemas WHERE is_active=1 ORDER BY version DESC LIMIT 1`).
+	                         FROM schemas WHERE is_active=1 ORDER BY version DESC LIMIT 1`).
 		Scan(&s.ID, &s.VaultID, &s.Version, &s.Title, &s.JSON, &s.IsActive, &s.CreatedAt); err != nil {
-		http.Error(w, "no active schema", 400)
+		json_err(w, http.StatusBadRequest, "no_active_schema", "create a schema first")
 		return
 	}
 	var sd schemaDoc
 	_ = json.Unmarshal([]byte(s.JSON), &sd)
 
+	// validate / coerce against schema definition (basic)
 	m := map[string]any{}
-	title := strings.TrimSpace(r.FormValue("__title"))
 	for _, f := range sd.Fields {
-		val := strings.TrimSpace(r.FormValue(f.Name))
-		if f.Required && val == "" {
-			http.Error(w, fmt.Sprintf("%s required", f.Label), 400)
+		val, ok := in.Data[f.Name]
+		if f.Required && (!ok || val == "") {
+			json_err(w, http.StatusBadRequest, "field_required", f.Label+" required")
 			return
 		}
 		switch f.Type {
 		case "number":
-			if val == "" {
-				m[f.Name] = nil
-			} else {
-				if _, err := strconv.ParseFloat(val, 64); err != nil {
-					http.Error(w, f.Label+": must be number", 400)
-					return
+			switch v := val.(type) {
+			case float64, int, int64, json.Number:
+				m[f.Name] = v
+			case string:
+				if v == "" {
+					m[f.Name] = nil
+				} else {
+					if _, err := strconv.ParseFloat(v, 64); err != nil {
+						json_err(w, http.StatusBadRequest, "type_error", f.Label+": must be number")
+						return
+					}
+					m[f.Name] = v
 				}
-				m[f.Name] = val
-			}
-		case "boolean":
-			m[f.Name] = (r.FormValue(f.Name) == "on" || r.FormValue(f.Name) == "true")
-		case "select":
-			if val != "" && !contains(f.Enum, val) {
-				http.Error(w, f.Label+": invalid option", 400)
+			case nil:
+				m[f.Name] = nil
+			default:
+				json_err(w, http.StatusBadRequest, "type_error", f.Label+": must be number")
 				return
 			}
-			m[f.Name] = val
+		case "boolean":
+			switch v := val.(type) {
+			case bool:
+				m[f.Name] = v
+			case string:
+				m[f.Name] = (strings.ToLower(v) == "true" || strings.ToLower(v) == "on" || v == "1")
+			default:
+				m[f.Name] = false
+			}
+		case "select":
+			sval := fmt.Sprint(val)
+			if sval != "" && !contains(f.Enum, sval) {
+				json_err(w, http.StatusBadRequest, "invalid_option", f.Label+": invalid option")
+				return
+			}
+			m[f.Name] = sval
 		default:
-			m[f.Name] = val
+			// string or whatever
+			m[f.Name] = fmt.Sprint(val)
 		}
 	}
 	bj, _ := json.Marshal(m)
+
+	title := strings.TrimSpace(in.Title)
 	if title == "" {
 		title = derive_title(m)
 	}
@@ -291,59 +356,54 @@ func handle_create_document(w http.ResponseWriter, r *http.Request, vaultID int6
 	                     VALUES(?,?,?,?,?,?)`, vaultID, s.ID, title, string(bj), time.Now().UTC(), time.Now().UTC())
 	if err != nil {
 		_ = tx.Rollback()
-		http.Error(w, err.Error(), 500)
+		json_err(w, http.StatusInternalServerError, "insert_failed", err.Error())
 		return
 	}
 	docID, _ := res.LastInsertId()
 	if _, err := tx.Exec(`INSERT INTO document_fts(rowid, title, data_text) VALUES(?,?,?)`,
 		docID, title, flatten_json_for_fts(m)); err != nil {
 		_ = tx.Rollback()
-		http.Error(w, err.Error(), 500)
+		json_err(w, http.StatusInternalServerError, "fts_failed", err.Error())
 		return
 	}
 	if err := tx.Commit(); err != nil {
-		http.Error(w, err.Error(), 500)
+		json_err(w, http.StatusInternalServerError, "commit_failed", err.Error())
 		return
 	}
 
-	if r.Header.Get("HX-Request") == "true" {
-		w.Header().Set("HX-Redirect", fmt.Sprintf("/vault/%d", vaultID))
-		w.WriteHeader(http.StatusNoContent)
-		return
-	}
-	http.Redirect(w, r, fmt.Sprintf("/vault/%d", vaultID), http.StatusSeeOther)
+	json_created(w, map[string]any{
+		"id":         docID,
+		"vault_id":   vaultID,
+		"schema_id":  s.ID,
+		"title":      title,
+		"data_json":  json.RawMessage(bj),
+		"created_at": time.Now().UTC(),
+		"updated_at": time.Now().UTC(),
+	})
 }
 
-// --- edit/update use per-vault path: /vault/{vaultID}/doc/{docID}/edit -------
-
-func handle_edit_document_form(w http.ResponseWriter, r *http.Request, vaultID, docID int64) {
+// GET /vault/{id}/doc/{docID}
+func handle_get_document(w http.ResponseWriter, r *http.Request, vaultID, docID int64) {
 	vdb, err := vs.db_for_vault(vaultID)
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		json_err(w, http.StatusInternalServerError, "db_open_failed", err.Error())
 		return
 	}
-
 	var d document
 	if err := vdb.QueryRow(`SELECT id, vault_id, schema_id, title, data_json, created_at, updated_at
 	                        FROM documents WHERE id=?`, docID).
 		Scan(&d.ID, &d.VaultID, &d.SchemaID, &d.Title, &d.DataJSON, &d.CreatedAt, &d.UpdatedAt); err != nil {
-		http.NotFound(w, r)
+		json_err(w, http.StatusNotFound, "doc_not_found", "document does not exist")
 		return
 	}
-	var s schema
-	_ = vdb.QueryRow(`SELECT id, vault_id, version, title, json, is_active, created_at FROM schemas WHERE id=?`, d.SchemaID).
-		Scan(&s.ID, &s.VaultID, &s.Version, &s.Title, &s.JSON, &s.IsActive, &s.CreatedAt)
-	var sd schemaDoc
-	_ = json.Unmarshal([]byte(s.JSON), &sd)
-	var data map[string]any
-	_ = json.Unmarshal([]byte(d.DataJSON), &data)
-	_ = tpl.ExecuteTemplate(w, "doc_edit.html", map[string]any{"doc": d, "schema": s, "sd": sd, "data": data})
+	with_json(w, d)
 }
 
+// PUT/PATCH /vault/{id}/doc/{docID}
 func handle_update_document(w http.ResponseWriter, r *http.Request, vaultID, docID int64) {
 	vdb, err := vs.db_for_vault(vaultID)
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		json_err(w, http.StatusInternalServerError, "db_open_failed", err.Error())
 		return
 	}
 
@@ -351,40 +411,70 @@ func handle_update_document(w http.ResponseWriter, r *http.Request, vaultID, doc
 	if err := vdb.QueryRow(`SELECT id, vault_id, schema_id, title, data_json, created_at, updated_at
 	                        FROM documents WHERE id=?`, docID).
 		Scan(&d.ID, &d.VaultID, &d.SchemaID, &d.Title, &d.DataJSON, &d.CreatedAt, &d.UpdatedAt); err != nil {
-		http.NotFound(w, r)
+		json_err(w, http.StatusNotFound, "doc_not_found", "document does not exist")
 		return
 	}
+
 	var s schema
 	_ = vdb.QueryRow(`SELECT id, vault_id, version, title, json, is_active, created_at FROM schemas WHERE id=?`, d.SchemaID).
 		Scan(&s.ID, &s.VaultID, &s.Version, &s.Title, &s.JSON, &s.IsActive, &s.CreatedAt)
+
 	var sd schemaDoc
 	_ = json.Unmarshal([]byte(s.JSON), &sd)
 
+	type input struct {
+		Title string         `json:"title"`
+		Data  map[string]any `json:"data"`
+	}
+	var in input
+	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
+		json_err(w, http.StatusBadRequest, "invalid_json", err.Error())
+		return
+	}
+
 	m := map[string]any{}
-	title := strings.TrimSpace(r.FormValue("__title"))
+	title := strings.TrimSpace(in.Title)
 	if title == "" {
 		title = d.Title
 	}
 	for _, f := range sd.Fields {
-		val := strings.TrimSpace(r.FormValue(f.Name))
-		if f.Required && val == "" {
-			http.Error(w, fmt.Sprintf("%s required", f.Label), 400)
+		val, ok := in.Data[f.Name]
+		if f.Required && (!ok || val == "") {
+			json_err(w, http.StatusBadRequest, "field_required", f.Label+" required")
 			return
 		}
 		switch f.Type {
 		case "number":
-			if val == "" {
-				m[f.Name] = nil
-			} else {
-				if _, err := strconv.ParseFloat(val, 64); err != nil {
-					http.Error(w, f.Label+": must be number", 400)
-					return
+			switch v := val.(type) {
+			case float64, int, int64, json.Number:
+				m[f.Name] = v
+			case string:
+				if v == "" {
+					m[f.Name] = nil
+				} else {
+					if _, err := strconv.ParseFloat(v, 64); err != nil {
+						json_err(w, http.StatusBadRequest, "type_error", f.Label+": must be number")
+						return
+					}
+					m[f.Name] = v
 				}
-				m[f.Name] = val
+			case nil:
+				m[f.Name] = nil
+			default:
+				json_err(w, http.StatusBadRequest, "type_error", f.Label+": must be number")
+				return
 			}
 		case "boolean":
-			m[f.Name] = (r.FormValue(f.Name) == "on" || r.FormValue(f.Name) == "true")
+			switch v := val.(type) {
+			case bool:
+				m[f.Name] = v
+			case string:
+				m[f.Name] = (strings.ToLower(v) == "true" || strings.ToLower(v) == "on" || v == "1")
+			default:
+				m[f.Name] = false
+			}
 		case "select":
+			sval := fmt.Sprint(val)
 			var fdef fieldDef
 			for _, fd := range sd.Fields {
 				if fd.Name == f.Name {
@@ -392,41 +482,43 @@ func handle_update_document(w http.ResponseWriter, r *http.Request, vaultID, doc
 					break
 				}
 			}
-			if val != "" && !contains(fdef.Enum, val) {
-				http.Error(w, f.Label+": invalid option", 400)
+			if sval != "" && !contains(fdef.Enum, sval) {
+				json_err(w, http.StatusBadRequest, "invalid_option", f.Label+": invalid option")
 				return
 			}
-			m[f.Name] = val
+			m[f.Name] = sval
 		default:
-			m[f.Name] = val
+			m[f.Name] = fmt.Sprint(val)
 		}
 	}
 	bj, _ := json.Marshal(m)
 
 	if _, err := vdb.Exec(`UPDATE documents SET title=?, data_json=?, updated_at=? WHERE id=?`,
 		title, string(bj), time.Now().UTC(), docID); err != nil {
-		http.Error(w, err.Error(), 500)
+		json_err(w, http.StatusInternalServerError, "update_failed", err.Error())
 		return
 	}
 	_, _ = vdb.Exec(`INSERT INTO document_fts(document_fts, rowid, title, data_text) VALUES('delete', ?, '', '')`, docID)
 	_, _ = vdb.Exec(`INSERT INTO document_fts(rowid, title, data_text) VALUES(?,?,?)`, docID, title, flatten_json_for_fts(m))
 
-	if r.Header.Get("HX-Request") == "true" {
-		w.Header().Set("HX-Redirect", fmt.Sprintf("/vault/%d", vaultID))
-		w.WriteHeader(http.StatusNoContent)
-		return
-	}
-	http.Redirect(w, r, fmt.Sprintf("/vault/%d", vaultID), http.StatusSeeOther)
+	with_json(w, map[string]any{
+		"id":         docID,
+		"vault_id":   vaultID,
+		"schema_id":  d.SchemaID,
+		"title":      title,
+		"data_json":  json.RawMessage(bj),
+		"created_at": d.CreatedAt,
+		"updated_at": time.Now().UTC(),
+	})
 }
 
-// --- search (per-vault db) ---------------------------------------------------
-
+// GET /vault/{id}/search?q=...
 func handle_search(w http.ResponseWriter, r *http.Request, vaultID int64) {
 	q := strings.TrimSpace(r.URL.Query().Get("q"))
 
 	vdb, err := vs.db_for_vault(vaultID)
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		json_err(w, http.StatusInternalServerError, "db_open_failed", err.Error())
 		return
 	}
 
@@ -437,7 +529,7 @@ func handle_search(w http.ResponseWriter, r *http.Request, vaultID int64) {
 		WHERE document_fts MATCH ?
 		ORDER BY rank LIMIT 100`, q)
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		json_err(w, http.StatusInternalServerError, "query_failed", err.Error())
 		return
 	}
 	defer rows.Close()
@@ -446,16 +538,14 @@ func handle_search(w http.ResponseWriter, r *http.Request, vaultID int64) {
 	for rows.Next() {
 		var d document
 		if err := rows.Scan(&d.ID, &d.VaultID, &d.SchemaID, &d.Title, &d.DataJSON, &d.CreatedAt, &d.UpdatedAt); err != nil {
-			http.Error(w, err.Error(), 500)
+			json_err(w, http.StatusInternalServerError, "scan_failed", err.Error())
 			return
 		}
 		docs = append(docs, d)
 	}
-	v, _ := ix.get_vault(vaultID)
-	// HTMX partial?
-	if r.Header.Get("HX-Request") == "true" {
-		_ = tpl.ExecuteTemplate(w, "_doc_list.html", docs)
-		return
-	}
-	_ = tpl.ExecuteTemplate(w, "vault.html", map[string]any{"vault": v, "schema": nil, "documents": docs})
+	with_json(w, map[string]any{
+		"q":     q,
+		"count": len(docs),
+		"docs":  docs,
+	})
 }

@@ -1,10 +1,8 @@
 package main
 
 import (
-	"embed"
 	"log"
 	"net/http"
-	"text/template"
 
 	_ "modernc.org/sqlite"
 )
@@ -14,10 +12,6 @@ var (
 	ix      *indexer
 	vs      *vault_store
 )
-
-//go:embed templates/*
-var tplFS embed.FS
-var tpl = template.Must(template.ParseFS(tplFS, "templates/*.html"))
 
 func main() {
 	get_exe_dir()

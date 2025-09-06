@@ -53,12 +53,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Dreg.md",
+                "file": "Post - Legacy.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Dreg"
+              "title": "Post - Legacy"
             }
           }
         ],
@@ -135,7 +135,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Dreg.md",
+                "file": "Post - Legacy.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -145,7 +145,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Dreg"
+              "title": "Backlinks for Post - Legacy"
             }
           },
           {
@@ -211,6 +211,15 @@
   },
   "active": "c081685adce379e6",
   "lastOpenFiles": [
+    "THE-THREAD-SRD.md",
+    "Post - Legacy.md",
+    "Syphons.md",
+    "Prolog.md",
+    "Vibe.md",
+    "WakeUp.md",
+    "Droskow.md",
+    "Condensed Rules.md",
+    "Dreg.md",
     "Cornered Inn.md",
     "Chip.md",
     "Bergthold.md",
@@ -220,19 +229,12 @@
     "assets/logo.svg",
     "__index__.md",
     "assets",
-    "Vibe.md",
-    "WakeUp.md",
-    "Dreg.md",
-    "Droskow.md",
-    "Syphons.md",
     "assets/f2a739290b34d033962a83f0750ecfa4.jpg",
     "Guide.md",
     "__Legend.md",
     "index.md",
     "Jakob.md",
     "The River.md",
-    "THE-THREAD-SRD.md",
-    "Prolog.md",
     "posts/WakeUp.md",
     "posts/THE-THREAD-SRD.md",
     "posts/The River.md",
@@ -241,7 +243,6 @@
     "posts/map.psd",
     "posts/Guide.md",
     "posts/Droskow.md",
-    "posts/Dreg.md",
     "posts",
     "obsidian",
     "map.psd",
